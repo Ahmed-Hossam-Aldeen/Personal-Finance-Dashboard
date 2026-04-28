@@ -56,7 +56,6 @@ if not df_transactions.empty:
         col1.metric("Total Spent", f"{df_filtered_trans['Amount'].sum():,.2f} EGP")
         col2.metric("Transaction Count", len(df_filtered_trans))
 
-        st.subheader("Spending Analysis")
         c1, c2 = st.columns(2)
         
         fig_cat = px.pie(df_filtered_trans, values='Amount', names='Category', title="Spending by Category", hole=0.4)
@@ -65,9 +64,8 @@ if not df_transactions.empty:
         fig_trend = px.line(df_filtered_trans.sort_values('Date'), x='Date', y='Amount', title="Daily Spending Trend", markers=True)
         c2.plotly_chart(fig_trend, use_container_width=True)
 
-        st.subheader("Top Merchants")
-        top_merch = df_filtered_trans.groupby('Merchant')['Amount'].sum().reset_index().sort_values('Amount', ascending=False)
-        fig_merch = px.bar(top_merch, x='Merchant', y='Amount', color='Amount', title="Top Spending Locations")
+        top_merch = df_filtered_trans.groupby(['Merchant', 'Category'])['Amount'].sum().reset_index().sort_values('Amount', ascending=False)
+        fig_merch = px.bar(top_merch, x='Merchant', y='Amount', color='Category', title="Top Spending Locations")
         st.plotly_chart(fig_merch, use_container_width=True)
 
         st.subheader("Transaction Details")
@@ -92,11 +90,11 @@ with tab2:
     st.plotly_chart(fig_flow, use_container_width=True)
 
     top_merch = df_sent.groupby('Party')['Amount'].sum().reset_index().sort_values('Amount', ascending=False)
-    fig_merch = px.bar(top_merch, x='Party', y='Amount', color='Amount', title="Top Spending Locations")
+    fig_merch = px.bar(top_merch, x='Party', y='Amount', color='Amount', title="Top Receiving Parties")
     st.plotly_chart(fig_merch, use_container_width=True)
 
     top_merch = df_recieved.groupby('Party')['Amount'].sum().reset_index().sort_values('Amount', ascending=False)
-    fig_merch = px.bar(top_merch, x='Party', y='Amount', color='Amount', title="Top Spending Locations")
+    fig_merch = px.bar(top_merch, x='Party', y='Amount', color='Amount', title="Top Sending Parties")
     st.plotly_chart(fig_merch, use_container_width=True)
 
     st.subheader("Transfer Details")
