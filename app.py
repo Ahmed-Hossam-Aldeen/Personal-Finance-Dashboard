@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime
 from parse_data import load_and_process_data
+from datetime import timedelta
 
 # --- SET PAGE CONFIG ---
 st.set_page_config(page_title="Personal Finance Dashboard", layout="wide")
@@ -33,7 +34,7 @@ tab1, tab2 = st.tabs(["🛒 Card Transactions", "💸 Instapay Transfers"])
 if not df_transactions.empty:
     st.sidebar.header("Filter Settings")
     min_date = min(df_transactions['Date'].min(), df_transfers['Date'].min()).date()
-    max_date = max(df_transactions['Date'].max(), df_transfers['Date'].max()).date()
+    max_date = max(df_transactions['Date'].max(), df_transfers['Date'].max()).date() + timedelta(days=1)
 
     date_range = st.sidebar.date_input("Select Time Window", [min_date, max_date], min_value=min_date, max_value=max_date)
 
@@ -71,6 +72,7 @@ if not df_transactions.empty:
 
         st.subheader("Transaction Details")
         st.dataframe(df_filtered_trans.sort_values('Date', ascending=False), use_container_width=True)
+
 # --- TAB 2: TRANSFERS ---
 with tab2:
     df_recieved = df_filtered_transf[df_filtered_transf['Type'] == 'Received']
