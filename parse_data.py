@@ -8,8 +8,9 @@ def load_and_process_data(xml_file_path, last_4_digits):
     def categorize(desc):
         desc = desc.upper()
         if any(x in desc for x in ['ATM', 'DAR EL SALAM']): return 'ATM'
-        elif any(x in desc for x in ['GOOGLE', 'GETCONTACT']): return 'Tech & Subs'
         elif any(x in desc for x in ['BREADFAST', 'DEE POINT', 'FOOD', 'METRO', 'KAZYON', 'ASWAQ', 'NADA', 'SUPERMRKT', 'HAWARY']): return 'Groceries & Food'
+        elif any(x in desc for x in ['GOOGLE', 'GETCONTACT']): return 'Tech & Subs'
+        elif any(x in desc for x in ['THNDR', 'JEW']): return 'Investment'
         elif 'ETISALAT' in desc: return 'Telecom'
         elif 'UBER' in desc: return 'Transportation'
         elif 'LC WAIKIKI' in desc: return 'Clothing & Shopping'
