@@ -7,16 +7,61 @@ import re
 def load_and_process_data(xml_file_path, last_4_digits):
     def categorize(desc):
         desc = desc.upper()
-        if any(x in desc for x in ['ATM', 'DAR EL SALAM']): return 'ATM'
-        elif any(x in desc for x in ['BREADFAST', 'DEE POINT', 'FOOD', 'METRO', 'KAZYON', 'ASWAQ', 'NADA', 'SUPERMRKT', 'HAWARY']): return 'Groceries & Food'
-        elif any(x in desc for x in ['GOOGLE', 'GETCONTACT']): return 'Tech & Subs'
-        elif any(x in desc for x in ['THNDR', 'JEW']): return 'Investment'
-        elif 'ETISALAT' in desc: return 'Telecom'
-        elif 'UBER' in desc: return 'Transportation'
-        elif 'LC WAIKIKI' in desc: return 'Clothing & Shopping'
-        elif any(x in desc for x in ['PHAR', 'MEDI']): return 'Health & Pharmacy'
-        elif 'FOREIGN EXCHANGE' in desc: return 'Fees'
-        else: return 'Others'
+        
+        # 1. Fees & Government
+        if any(x in desc for x in ['FOREIGN EXCHANGE', 'PASSPORT', 'FEES', 'COMMISSION', 'STAMP', 'TAX', 'RENEWAL', 'TRAFFIC', 'AMAN']): 
+            return 'Fees'
+        
+        # 2. Cash & ATM
+        elif any(x in desc for x in ['ATM', 'DAR EL SALAM', 'CIB', 'QNB', 'BANQUE MISR', 'WITHDRAWAL']): 
+            return 'ATM'
+        
+        # 3. Groceries & Food
+        elif any(x in desc for x in [
+            'BREADFAST', 'DEE POINT', 'FOOD', 'METRO', 'KAZYON', 'ASWAQ', 'NADA', 'TALABAT', 'SPINNEYS',
+            'SUPERMRKT', 'HAWARY', 'CARREFOUR', 'PIZZA', 'COFFEE', 'ROOSTERS', 'SEOUDI', 'LULU', 'ALFA',
+            'AGA', 'SECOND CUP', 'ETOILE', 'BAZOOKA', 'COOK DOOR', 'MCDONALDS', 'KFC', 'BURGER KING', 
+            'GOMLA', 'FATHALLA', 'COSTA', 'CINNABON', 'ELABD', 'STARBUCKS', 'DUNKIN'
+        ]): 
+            return 'Groceries & Food'
+
+        # 4. Clothing & Shopping
+        elif any(x in desc for x in [
+            'LC WAIKIKI', 'MAX', 'SHOES', 'SCARVES', 'CLOTHIN', 'DICE', 'LEATHER', 'DEFACTO', 'COTONIL', 
+            'BAHYA', 'HEGABE', 'ZARA', 'H&M', 'AMAZON', 'JUMIA', 'BERSHKA', 'STRADIVARIUS', 'PULL & BEAR', 
+            'ALDO', 'MISS DIVA', 'TIMBERLAND', 'ADIDAS', 'NIKE'
+        ]): 
+            return 'Clothing & Shopping'
+        
+        # 5. Home & Electronics
+        elif any(x in desc for x in [
+            'IKEA', 'ELTAWHEED', 'HOME', 'DREAM 2000', 'SELECT', 'EL ARABY', 'SHARAF DG', 'B TECH', 
+            'KIRIAZI', 'LIZARHOME', '2B', 'TRADELINE'
+        ]): 
+            return 'Home & Electronics'
+        
+        # 6. Health & Pharmacy
+        elif any(x in desc for x in ['PHAR', 'MEDI', 'ALMOKHTABAR', 'EZABY', 'SEIF', '19011', 'MISR PHARM', 'VEZEETA']): 
+            return 'Health & Pharmacy'
+        
+        # 7. Tech & Subs
+        elif any(x in desc for x in ['GOOGLE', 'GETCONTACT', 'NETFLIX', 'SPOTIFY', 'MICROSOFT', 'OPENAI', 'LINKEDIN', 'APPLE', 'ITUNES']): 
+            return 'Tech & Subs'
+        
+        # 8. Investment & Finance
+        elif any(x in desc for x in ['THNDR', 'JEW', 'HALAN', 'EFG', 'VALU', 'HERMES', 'MISR CAP']): 
+            return 'Investment'
+        
+        # 9. Telecom
+        elif any(x in desc for x in ['ETISALAT', 'VODAFONE', 'ORANGE', 'WE ', 'TE DATA']): 
+            return 'Telecom'
+            
+        # 10. Transportation
+        elif any(x in desc for x in ['UBER', 'DIDY', 'INDRIVE', 'SWVL', 'CAREEM']): 
+            return 'Transportation'
+        
+        else: 
+            return 'Others'
 
     tree = ET.parse(xml_file_path)
     root = tree.getroot()
