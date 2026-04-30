@@ -64,23 +64,54 @@ if not df_transactions.empty:
         fig_trend = px.line(df_filtered_trans.sort_values('Date'), x='Date', y='Amount', title="Daily Spending Trend", markers=True)
         c2.plotly_chart(fig_trend, use_container_width=True)
 
-        top_merch = df_filtered_trans.groupby(['Merchant', 'Category'])['Amount'].sum().reset_index().sort_values('Amount', ascending=False)
-        fig_merch = px.bar(top_merch, x='Merchant', y='Amount', color='Category', title="Top Spending Locations")
-        st.plotly_chart(fig_merch, use_container_width=True)
+        top_merch = df_filtered_trans.groupby(['Merchant', 'Category']).agg(
+            Amount=('Amount', 'sum'),
+            Frequency=('Amount', 'count')
+        ).reset_index().sort_values('Amount', ascending=False)
 
+        # 2. Filter for merchants visited more than once for a specific "Loyalty" insight
+        frequent_merch = top_merch[top_merch['Frequency'] > 1].sort_values('Frequency', ascending=False)
+
+        # 3. Enhanced Bar Chart: Shows Amount, but adds Frequency to the hover tooltip
+        fig_merch = px.bar(
+            top_merch, 
+            x='Merchant', 
+            y='Amount', 
+            color='Category', 
+            title="Top Spending Locations",
+            hover_data={'Frequency': True} # This adds the visit count to the popup
+)
+        st.plotly_chart(fig_merch, use_container_width=True)
+        # 4. New Section: Frequency Leaderboard
+        if not frequent_merch.empty:
+            st.subheader("🔁 Habitual Merchants (Visited > 1 time)")
+            
+            # Optional: Visualizing frequency specifically
+            fig_freq = px.bar(
+                frequent_merch.head(10), 
+                x='Frequency', 
+                y='Merchant', 
+                orientation='h',
+                color='Category',
+                title="Top 10 Merchants by Visit Frequency",
+                text='Frequency'
+            )
+            fig_freq.update_traces(textposition='outside')
+            st.plotly_chart(fig_freq, use_container_width=True)
+            
         st.subheader("Transaction Details")
         st.dataframe(df_filtered_trans.sort_values('Date', ascending=False), use_container_width=True)
 
 # --- TAB 2: TRANSFERS ---
 with tab2:
-    df_recieved = df_filtered_transf[df_filtered_transf['Type'] == 'Received']
+    df_received = df_filtered_transf[df_filtered_transf['Type'] == 'Received']
     df_sent = df_filtered_transf[df_filtered_transf['Type'] == 'Sent']
     sent = df_sent['Amount'].sum()
-    received = df_recieved['Amount'].sum()
+    received = df_received['Amount'].sum()
 
     col1, col2 = st.columns(2)
     col1.metric("Sent Count", len(df_sent))
-    col2.metric("Received Count", len(df_recieved))
+    col2.metric("Received Count", len(df_received))
     
     col3, col4 = st.columns(2)
     col3.metric("Total Sent", f"{sent:,.2f} EGP", delta_color="inverse")
@@ -88,14 +119,57 @@ with tab2:
 
     fig_flow = px.histogram(df_filtered_transf, x="Date", y="Amount", color="Type", barmode="group", title="Daily Sent vs Received")
     st.plotly_chart(fig_flow, use_container_width=True)
+    
+    # Aggregate both Sum and Count for Sent transfers
+    top_sent_parties = df_sent.groupby('Party').agg(
+        Total_Amount=('Amount', 'sum'),
+        Frequency=('Amount', 'count')
+    ).reset_index().sort_values('Total_Amount', ascending=False)
 
-    top_merch = df_sent.groupby('Party')['Amount'].sum().reset_index().sort_values('Amount', ascending=False)
-    fig_merch = px.bar(top_merch, x='Party', y='Amount', color='Amount', title="Top Receiving Parties")
-    st.plotly_chart(fig_merch, use_container_width=True)
+    st.divider()
+    # Bar chart with Frequency in hover data
+    fig_sent = px.bar(
+        top_sent_parties, 
+        x='Party', 
+        y='Total_Amount', 
+        color='Total_Amount', 
+        title="Top Receiving Parties (By Amount)",
+        hover_data={'Frequency': True},
+        labels={'Total_Amount': 'Total EGP', 'Frequency': 'Times Sent'}
+    )
+    st.plotly_chart(fig_sent, use_container_width=True)
 
-    top_merch = df_recieved.groupby('Party')['Amount'].sum().reset_index().sort_values('Amount', ascending=False)
-    fig_merch = px.bar(top_merch, x='Party', y='Amount', color='Amount', title="Top Sending Parties")
-    st.plotly_chart(fig_merch, use_container_width=True)
+    # Optional: Show a small leaderboard for frequent recipients
+    frequent_sent = top_sent_parties[top_sent_parties['Frequency'] > 1].sort_values('Frequency', ascending=False)
+    if not frequent_sent.empty:
+        st.write("🔄 **Frequent Recipients:**")
+        st.dataframe(frequent_sent[['Party', 'Frequency', 'Total_Amount']].head(5), hide_index=True)
+    st.divider()
 
-    st.subheader("Transfer Details")
+    # Aggregate both Sum and Count for Received transfers
+    top_received_parties = df_received.groupby('Party').agg(
+        Total_Amount=('Amount', 'sum'),
+        Frequency=('Amount', 'count')
+    ).reset_index().sort_values('Total_Amount', ascending=False)
+
+    # Bar chart with Frequency in hover data
+    fig_received = px.bar(
+        top_received_parties, 
+        x='Party', 
+        y='Total_Amount', 
+        color='Total_Amount', 
+        title="Top Sending Parties (By Amount)",
+        hover_data={'Frequency': True},
+        labels={'Total_Amount': 'Total EGP', 'Frequency': 'Times Received'}
+    )
+    st.plotly_chart(fig_received, use_container_width=True)
+
+    # Optional: Show a small leaderboard for frequent senders
+    frequent_received = top_received_parties[top_received_parties['Frequency'] > 1].sort_values('Frequency', ascending=False)
+    if not frequent_received.empty:
+        st.write("📩 **Frequent Senders:**")
+        st.dataframe(frequent_received[['Party', 'Frequency', 'Total_Amount']].head(5), hide_index=True)
+    
+    st.divider()
+    st.subheader("All Transfers")
     st.dataframe(df_filtered_transf.sort_values('Date', ascending=False), use_container_width=True)
