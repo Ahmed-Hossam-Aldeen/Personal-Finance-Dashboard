@@ -6,6 +6,11 @@ import re
 @st.cache_data
 def load_and_process_data(xml_file_path, last_4_digits):
     def categorize(desc):
+        if '*' in desc:
+            desc = desc.split('*')[1]
+            print(desc)
+        else:
+            print('no * in ', desc)
         desc = desc.upper()
         
         # 1. Fees & Government
@@ -13,15 +18,18 @@ def load_and_process_data(xml_file_path, last_4_digits):
             return 'Fees'
         
         # 2. Cash & ATM
-        elif any(x in desc for x in ['ATM', 'DAR EL SALAM', 'CIB', 'QNB', 'BANQUE MISR', 'WITHDRAWAL']): 
+        elif any(x in desc for x in ['ATM','NATIONAL BANK OF EGYPT', 'DAR EL SALAM', 'CIB', 'QNB','BM', 'BANQUE MISR', 'WITHDRAWAL']): 
             return 'ATM'
         
         # 3. Groceries & Food
         elif any(x in desc for x in [
-            'BREADFAST', 'DEE POINT', 'FOOD', 'METRO', 'KAZYON', 'ASWAQ', 'NADA', 'TALABAT', 'SPINNEYS',
-            'SUPERMRKT', 'HAWARY', 'CARREFOUR', 'PIZZA', 'COFFEE', 'ROOSTERS', 'SEOUDI', 'LULU', 'ALFA',
-            'AGA', 'SECOND CUP', 'ETOILE', 'BAZOOKA', 'COOK DOOR', 'MCDONALDS', 'KFC', 'BURGER KING', 
-            'GOMLA', 'FATHALLA', 'COSTA', 'CINNABON', 'ELABD', 'STARBUCKS', 'DUNKIN'
+            'BREADFAST', 'DEE POINT', 'FOOD', 'METRO', 'KAZYON', 'ASWAQ', 'NADA', 'TALABAT', 'SPINNEYS','MARKT', 'MARKET',
+            'SUPERMRKT', 'HAWARY', 'CARREFOUR', 'PIZZA', 'COFFEE', 'ROOSTERS', 'SEOUDI', 'LULU', 'ALFA', 'LYFE',
+            'AGA', 'SECOND CUP', 'ETOILE', 'BAZOOKA', 'COOK DOOR', 'MCDONALDS', 'KFC', 'BURGER KING', 'MOLLYS',
+            'KATURA', 'BEANOS', 'CILANTRO', 'CAFE', 'WOK', 'TRUCK', 'BREW', 'ELMADENA ALMONWARA',
+            'GOMLA', 'FATHALLA', 'COSTA', 'CINNABON', 'ELABD', 'STARBUCKS', 'DUNKIN', 'BAKERY', 'LAMOAGHZA',
+            'ABU AUF', 'QAHWA', 'ESPRESSO', 'BAKE', '1980', 'GOURMET', 'FOAM', 'SIP', 'ICE CREAM',
+            'WHAT THE TRUC', '30 NORTH', 'MASHWY', 'BEST BUY', 'ARDNA'
         ]): 
             return 'Groceries & Food'
 
@@ -29,31 +37,31 @@ def load_and_process_data(xml_file_path, last_4_digits):
         elif any(x in desc for x in [
             'LC WAIKIKI', 'MAX', 'SHOES', 'SCARVES', 'CLOTHIN', 'DICE', 'LEATHER', 'DEFACTO', 'COTONIL', 
             'BAHYA', 'HEGABE', 'ZARA', 'H&M', 'AMAZON', 'JUMIA', 'BERSHKA', 'STRADIVARIUS', 'PULL & BEAR', 
-            'ALDO', 'MISS DIVA', 'TIMBERLAND', 'ADIDAS', 'NIKE'
+            'ALDO', 'MISS DIVA', 'TIMBERLAND', 'ADIDAS', 'NIKE', 'FRAGRA', 'DECATHLON', 'CLOTHES'
         ]): 
             return 'Clothing & Shopping'
         
         # 5. Home & Electronics
         elif any(x in desc for x in [
             'IKEA', 'ELTAWHEED', 'HOME', 'DREAM 2000', 'SELECT', 'EL ARABY', 'SHARAF DG', 'B TECH', 
-            'KIRIAZI', 'LIZARHOME', '2B', 'TRADELINE'
+            'KIRIAZI', 'LIZARHOME', '2B', 'TRADELINE', 'DREAM'
         ]): 
             return 'Home & Electronics'
         
         # 6. Health & Pharmacy
-        elif any(x in desc for x in ['PHAR', 'MEDI', 'ALMOKHTABAR', 'EZABY', 'SEIF', '19011', 'MISR PHARM', 'VEZEETA']): 
+        elif any(x in desc for x in ['GYM', 'AFRICANA', 'PHAR', 'MEDI', 'ALMOKHTABAR', 'EZABY', 'SEIF', '19011', 'MISR PHARM', 'VEZEETA']): 
             return 'Health & Pharmacy'
         
         # 7. Tech & Subs
-        elif any(x in desc for x in ['GOOGLE', 'GETCONTACT', 'NETFLIX', 'SPOTIFY', 'MICROSOFT', 'OPENAI', 'LINKEDIN', 'APPLE', 'ITUNES']): 
-            return 'Tech & Subs'
+        elif any(x in desc for x in ['ELSAWY','GOOGLE', 'GETCONTACT', 'NETFLIX', 'SPOTIFY', 'MICROSOFT', 'OPENAI', 'LINKEDIN', 'APPLE', 'ITUNES']): 
+            return 'Entertainment & Subs'
         
         # 8. Investment & Finance
-        elif any(x in desc for x in ['THNDR', 'JEW', 'HALAN', 'EFG', 'VALU', 'HERMES', 'MISR CAP']): 
+        elif any(x in desc for x in ['FINANCE','THNDR', 'JEW', 'HALAN', 'EFG', 'VALU', 'HERMES', 'MISR CAP']): 
             return 'Investment'
         
         # 9. Telecom
-        elif any(x in desc for x in ['ETISALAT', 'VODAFONE', 'ORANGE', 'WE ', 'TE DATA']): 
+        elif any(x in desc for x in ['ETISALAT', 'VODAFONE', 'ORANGE', 'WE ', 'TE DATA', 'MYFAWRY']): 
             return 'Telecom'
             
         # 10. Transportation
