@@ -9,8 +9,6 @@ def load_and_process_data(xml_file_path, last_4_digits):
         if '*' in desc:
             desc = desc.split('*')[1]
             print(desc)
-        else:
-            print('no * in ', desc)
         desc = desc.upper()
         
         # 1. Fees & Government
@@ -26,7 +24,7 @@ def load_and_process_data(xml_file_path, last_4_digits):
             'BREADFAST', 'DEE POINT', 'FOOD', 'METRO', 'KAZYON', 'ASWAQ', 'NADA', 'TALABAT', 'SPINNEYS','MARKT', 'MARKET',
             'SUPERMRKT', 'HAWARY', 'CARREFOUR', 'PIZZA', 'COFFEE', 'ROOSTERS', 'SEOUDI', 'LULU', 'ALFA', 'LYFE',
             'AGA', 'SECOND CUP', 'ETOILE', 'BAZOOKA', 'COOK DOOR', 'MCDONALDS', 'KFC', 'BURGER KING', 'MOLLYS',
-            'KATURA', 'BEANOS', 'CILANTRO', 'CAFE', 'WOK', 'TRUCK', 'BREW', 'ELMADENA ALMONWARA',
+            'KATURA', 'BEANOS', 'CILANTRO', 'CAFE', 'WOK', 'TRUCK', 'BREW', 'ELMADENA ALMONWARA','ELMADINA ',
             'GOMLA', 'FATHALLA', 'COSTA', 'CINNABON', 'ELABD', 'STARBUCKS', 'DUNKIN', 'BAKERY', 'LAMOAGHZA',
             'ABU AUF', 'QAHWA', 'ESPRESSO', 'BAKE', '1980', 'GOURMET', 'FOAM', 'SIP', 'ICE CREAM',
             'WHAT THE TRUC', '30 NORTH', 'MASHWY', 'BEST BUY', 'ARDNA'
