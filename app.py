@@ -28,7 +28,7 @@ else:
     st.stop()
 
 # --- TABS ---
-tab1, tab2 = st.tabs(["🛒 Card Transactions", "💸 Instapay Transfers"])
+tab1, tab2, tab3 = st.tabs(["🛒 Card Transactions", "💸 Instapay Transfers", "🎯 Monthly Budget"])
 
 # --- SIDEBAR FILTERS ---
 if not df_transactions.empty:
@@ -173,3 +173,32 @@ with tab2:
     st.divider()
     st.subheader("All Transfers")
     st.dataframe(df_filtered_transf.sort_values('Date', ascending=False), use_container_width=True)
+
+
+with tab3:
+    st.subheader("Monthly Budget")
+    df_sent = df_filtered_transf[df_filtered_transf['Type'] == 'Sent']
+
+    budget = st.slider("Select Budget", min_value=0, max_value=100000, value=7000, step=500)
+    fixed_expenses = st.number_input("Duplicated Expenses", value=7000)
+    purchases = int(df_filtered_trans['Amount'].sum())
+    transfers = int(df_sent['Amount'].sum()) 
+    
+    total_spent_raw = purchases + transfers
+    total_spent = total_spent_raw - fixed_expenses
+    remaining = budget - total_spent
+
+    st.markdown("### 📊 Financial Overview")
+    col1, col2, col3, col4 = st.columns(4)
+    
+    col1.metric("🛒 Purchases", f"{purchases} EGP")
+    col2.metric("💸 Transfers", f"{transfers} EGP")
+    col3.metric("🧾 Total Spent", f"{total_spent} EGP", help="Purchases + Transfers - Fixed Expenses")
+    
+    delta_text = f"{(remaining / budget) * 100:.1f}% left" if budget > 0 else ""
+    col4.metric("💰 Remaining", f"{remaining} EGP", delta=delta_text, delta_color="normal")
+
+    # Add a visual progress bar for budget usage
+    budget_usage_pct = (total_spent / budget) if budget > 0 else 0.0
+    st.markdown(f"**Budget Usage:** `{max(0, budget_usage_pct * 100):.1f}%`")
+    st.progress(min(max(budget_usage_pct, 0.0), 1.0))
