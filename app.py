@@ -36,7 +36,74 @@ if not df_transactions.empty:
     min_date = min(df_transactions['Date'].min(), df_transfers['Date'].min()).date()
     max_date = max(df_transactions['Date'].max(), df_transfers['Date'].max()).date() + timedelta(days=1)
 
-    date_range = st.sidebar.date_input("Select Time Window", [min_date, max_date], min_value=min_date, max_value=max_date)
+    # Pre-calculate relative preset ranges
+    today = datetime.now().date()
+    
+    # 1. This Week (Monday to today/max_date)
+    this_week_start = max_date - timedelta(days = 7)
+    this_week_end = max_date
+    
+    # 2. This Month (1st of this month to today/max_date)
+    start_of_month = today.replace(day=1)
+    this_month_start = max(start_of_month, min_date)
+    this_month_end = min(today, max_date)
+    
+    # 3. Last Month (1st of last month to end of last month)
+    last_month_end_date = today.replace(day=1) - timedelta(days=1)
+    start_of_last_month = last_month_end_date.replace(day=1)
+    last_month_start = max(start_of_last_month, min_date)
+    last_month_end = min(last_month_end_date, max_date)
+
+    # Initialize state variables
+    if "date_input_key" not in st.session_state:
+        st.session_state.date_input_key = [min_date, max_date]
+
+    if "preset_option" not in st.session_state:
+        st.session_state.preset_option = "All Time"
+
+    # Callbacks for synchronization
+    def on_preset_change():
+        selected = st.session_state.preset_option
+        if selected == "This Week":
+            st.session_state.date_input_key = [this_week_start, this_week_end]
+        elif selected == "This Month":
+            st.session_state.date_input_key = [this_month_start, this_month_end]
+        elif selected == "Last Month":
+            st.session_state.date_input_key = [last_month_start, last_month_end]
+        elif selected == "All Time":
+            st.session_state.date_input_key = [min_date, max_date]
+
+    def on_date_input_change():
+        val = st.session_state.date_input_key
+        if len(val) == 2:
+            if val[0] == this_week_start and val[1] == this_week_end:
+                st.session_state.preset_option = "This Week"
+            elif val[0] == this_month_start and val[1] == this_month_end:
+                st.session_state.preset_option = "This Month"
+            elif val[0] == last_month_start and val[1] == last_month_end:
+                st.session_state.preset_option = "Last Month"
+            elif val[0] == min_date and val[1] == max_date:
+                st.session_state.preset_option = "All Time"
+            else:
+                st.session_state.preset_option = "Custom Range"
+
+    # Render Preset Dropdown
+    st.sidebar.selectbox(
+        "Select Date Preset",
+        ["All Time", "This Week", "This Month", "Last Month", "Custom Range"],
+        key="preset_option",
+        on_change=on_preset_change
+    )
+
+    # Render Custom Date Input
+    date_range = st.sidebar.date_input(
+        "Select Time Window",
+        value=st.session_state.date_input_key,
+        min_value=min_date,
+        max_value=max_date,
+        key="date_input_key",
+        on_change=on_date_input_change
+    )
 
     if len(date_range) == 2:
         start_date, end_date = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
