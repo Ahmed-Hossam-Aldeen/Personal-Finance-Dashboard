@@ -3,79 +3,85 @@ import xml.etree.ElementTree as ET
 import streamlit as st
 import re
 
-@st.cache_data
-def load_and_process_data(xml_file_path, last_4_digits):
-    def categorize(desc):
-        if '*' in desc:
-            desc = desc.split('*')[1]
-            print(desc)
-        desc = desc.upper()
-        
-        # 1. Fees & Government
-        if any(x in desc for x in ['FOREIGN EXCHANGE', 'PASSPORT', 'FEES', 'COMMISSION', 'STAMP', 'TAX', 'RENEWAL', 'TRAFFIC', 'AMAN']): 
-            return 'Fees'
-        
-        # 2. Cash & ATM
-        elif any(x in desc for x in ['ATM','NATIONAL BANK OF EGYPT', 'DAR EL SALAM', 'CIB', 'QNB','BM', 'BANQUE MISR', 'WITHDRAWAL']): 
-            return 'ATM'
-        
-        # 3. Groceries & Food
-        elif any(x in desc for x in [
-            'BREADFAST', 'DEE POINT', 'FOOD', 'METRO', 'KAZYON', 'ASWAQ', 'NADA', 'TALABAT', 'SPINNEYS','MARKT', 'MARKET',
-            'SUPERMRKT', 'HAWARY', 'CARREFOUR', 'PIZZA', 'COFFEE', 'ROOSTERS', 'SEOUDI', 'LULU', 'ALFA', 'LYFE',
-            'AGA', 'SECOND CUP', 'ETOILE', 'BAZOOKA', 'COOK DOOR', 'MCDONALDS', 'KFC', 'BURGER KING', 'MOLLYS',
-            'KATURA', 'BEANOS', 'CILANTRO', 'CAFE', 'WOK', 'TRUCK', 'BREW', 'ELMADENA ALMONWARA','ELMADINA ',
-            'GOMLA', 'FATHALLA', 'COSTA', 'CINNABON', 'ELABD', 'STARBUCKS', 'DUNKIN', 'BAKERY', 'LAMOAGHZA',
-            'ABU AUF', 'QAHWA', 'ESPRESSO', 'BAKE', '1980', 'GOURMET', 'FOAM', 'SIP', 'ICE CREAM',
-            'WHAT THE TRUC', '30 NORTH', 'MASHWY', 'BEST BUY', 'ARDNA'
-        ]): 
-            return 'Groceries & Food'
+def categorize(desc):
+    if '*' in desc:
+        desc = desc.split('*')[1]
+        print(desc)
+    desc = desc.upper()
+    
+    # 1. Fees & Government
+    if any(x in desc for x in ['FOREIGN EXCHANGE', 'PASSPORT', 'FEES', 'COMMISSION', 'STAMP', 'TAX', 'RENEWAL', 'TRAFFIC', 'AMAN', 'EGYPTIAN CUSTOM']): 
+        return 'Fees'
+    
+    # 2. Cash & ATM
+    elif any(x in desc for x in ['ATM','NATIONAL BANK OF EGYPT', 'DAR EL SALAM', 'CIB', 'QNB','BM', 'BANQUE MISR', 'WITHDRAWAL']): 
+        return 'ATM'
+    
+    # 3. Groceries & Food
+    elif any(x in desc for x in [
+        'BREADFAST', 'DEE POINT', 'FOOD', 'METRO', 'KAZYON', 'ASWAQ', 'NADA', 'TALABAT', 'SPINNEYS','MARKT', 'MARKET',
+        'SUPERMRKT', 'HAWARY', 'CARREFOUR', 'PIZZA', 'COFFEE', 'ROOSTERS', 'SEOUDI', 'LULU', 'ALFA', 'LYFE',
+        'AGA', 'SECOND CUP', 'ETOILE', 'BAZOOKA', 'COOK DOOR', 'MCDONALDS', 'KFC', 'BURGER KING', 'MOLLYS',
+        'KATURA', 'BEANOS', 'CILANTRO', 'CAFE', 'WOK', 'TRUCK', 'BREW', 'ELMADENA ALMONWARA','ELMADINA ',
+        'GOMLA', 'FATHALLA', 'COSTA', 'CINNABON', 'ELABD', 'STARBUCKS', 'DUNKIN', 'BAKERY', 'LAMOAGHZA',
+        'ABU AUF', 'QAHWA', 'ESPRESSO', 'BAKE', '1980', 'GOURMET', 'FOAM', 'SIP', 'ICE CREAM', 'MANDARINE','ELKEBIR',
+        'WHAT THE TRUC', '30 NORTH', 'MASHWY', 'BEST BUY', 'ARDNA','RDNA', 'TEA', 'ABW BRYN'
+    ]): 
+        return 'Groceries & Food'
 
-        # 4. Clothing & Shopping
-        elif any(x in desc for x in [
-            'LC WAIKIKI', 'MAX', 'SHOES', 'SCARVES', 'CLOTHIN', 'DICE', 'LEATHER', 'DEFACTO', 'COTONIL', 
-            'BAHYA', 'HEGABE', 'ZARA', 'H&M', 'AMAZON', 'JUMIA', 'BERSHKA', 'STRADIVARIUS', 'PULL & BEAR', 
-            'ALDO', 'MISS DIVA', 'TIMBERLAND', 'ADIDAS', 'NIKE', 'FRAGRA', 'DECATHLON', 'CLOTHES'
-        ]): 
-            return 'Clothing & Shopping'
+    # 4. Clothing & Shopping
+    elif any(x in desc for x in [
+        'LC WAIKIKI', 'MAX', 'SHOES', 'SCARVES', 'CLOTHIN', 'DICE', 'LEATHER', 'DEFACTO', 'COTONIL', 
+        'BAHYA', 'HEGABE', 'ZARA', 'H&M', 'AMAZON', 'JUMIA', 'BERSHKA', 'STRADIVARIUS', 'PULL & BEAR', 
+        'ALDO', 'MISS DIVA', 'TIMBERLAND', 'ADIDAS', 'NIKE', 'FRAGRA', 'DECATHLON', 'CLOTHES'
+    ]): 
+        return 'Clothing & Shopping'
+    
+    # 5. Home & Electronics
+    elif any(x in desc for x in [
+        'IKEA', 'ELTAWHEED', 'HOME', 'DREAM 2000', 'SELECT', 'EL ARABY', 'SHARAF DG', 'B TECH', 
+        'KIRIAZI', 'LIZARHOME', '2B', 'TRADELINE', 'DREAM'
+    ]): 
+        return 'Home & Electronics'
+    
+    # 6. Health & Pharmacy
+    elif any(x in desc for x in ['ANEES', 'GYM', 'AFRICANA', 'PHAR', 'MEDI', 'ALMOKHTABAR', 'EZABY', 'SEIF', '19011', 'MISR PHARM', 'VEZEETA']): 
+        return 'Health & Pharmacy'
+    
+    # 7. Tech & Subs
+    elif any(x in desc for x in ['ELSAWY','GOOGLE', 'GETCONTACT', 'NETFLIX', 'SPOTIFY', 'MICROSOFT', 'OPENAI', 'LINKEDIN', 'APPLE', 'ITUNES']): 
+        return 'Entertainment & Subs'
+    
+    # 8. Investment & Finance
+    elif any(x in desc for x in ['FINANCE','THNDR', 'JEW', 'HALAN', 'EFG', 'VALU', 'HERMES', 'MISR CAP']): 
+        return 'Investment'
+    
+    # 9. Telecom
+    elif any(x in desc for x in ['ETISALAT', 'VODAFONE', 'ORANGE', 'WE ', 'TE DATA', 'MYFAWRY']): 
+        return 'Telecom'
         
-        # 5. Home & Electronics
-        elif any(x in desc for x in [
-            'IKEA', 'ELTAWHEED', 'HOME', 'DREAM 2000', 'SELECT', 'EL ARABY', 'SHARAF DG', 'B TECH', 
-            'KIRIAZI', 'LIZARHOME', '2B', 'TRADELINE', 'DREAM'
-        ]): 
-            return 'Home & Electronics'
-        
-        # 6. Health & Pharmacy
-        elif any(x in desc for x in ['GYM', 'AFRICANA', 'PHAR', 'MEDI', 'ALMOKHTABAR', 'EZABY', 'SEIF', '19011', 'MISR PHARM', 'VEZEETA']): 
-            return 'Health & Pharmacy'
-        
-        # 7. Tech & Subs
-        elif any(x in desc for x in ['ELSAWY','GOOGLE', 'GETCONTACT', 'NETFLIX', 'SPOTIFY', 'MICROSOFT', 'OPENAI', 'LINKEDIN', 'APPLE', 'ITUNES']): 
-            return 'Entertainment & Subs'
-        
-        # 8. Investment & Finance
-        elif any(x in desc for x in ['FINANCE','THNDR', 'JEW', 'HALAN', 'EFG', 'VALU', 'HERMES', 'MISR CAP']): 
-            return 'Investment'
-        
-        # 9. Telecom
-        elif any(x in desc for x in ['ETISALAT', 'VODAFONE', 'ORANGE', 'WE ', 'TE DATA', 'MYFAWRY']): 
-            return 'Telecom'
-            
-        # 10. Transportation
-        elif any(x in desc for x in ['UBER', 'DIDY', 'INDRIVE', 'SWVL', 'CAREEM']): 
-            return 'Transportation'
-        
-        else: 
-            return 'Others'
+    # 10. Transportation
+    elif any(x in desc for x in ['UBER', 'DIDY', 'INDRIVE', 'SWVL', 'CAREEM']): 
+        return 'Transportation'
+    
+    else: 
+        return 'Others'
+
+@st.cache_data
+def load_and_process_data(xml_file_path, last_4_digits, target_bank):
 
     tree = ET.parse(xml_file_path)
     root = tree.getroot()
 
-    deduction_pattern = r"تم تنفيذ تحويل لحظي من حسابكم رقم \d+ بمبلغ (?P<amount>[\d\.]+) جم إلى (?P<receiver>.*?) رقم مرجعي"
-    addition_pattern = r"تم إضافة تحويل لحظي لحسابكم رقم\s+(?P<account>\d+)\s+بمبلغ\s+(?P<amount>[\d\.,]+)\s+جم\s+من\s+(?P<sender>.*?)\s+رقم مرجعي\s+(?P<ref>\d+)\s+يوم\s+(?P<date>[\d-]+)\s+الساعة\s+(?P<time>[\d:]+)"
-    debit_card_pattern = r"تم خصم ([\d\.,]+)EGP.*?عند (.*?) يوم"
-    
+    if target_bank == 'CIB':
+        deduction_pattern = r"يرجى العلم انه تم تنفيذ تحويل لحظي بمبلغ\s+(?P<amount>[\d\.,]+)\s+جم من حسابك المنتهي بـ\s+(?P<account_last_4>.*?\d+) برقم مرجعي\s+(?P<ref>\w+) بتاريخ\s+(?P<date>[\d-]+)\s+(?P<time>[\d:]+)"
+        addition_pattern = r"تم إضافة تحويل لحظي لحسابكم رقم\s+(?P<account>\d+)\s+بمبلغ\s+(?P<amount>[\d\.,]+)\s+جم\s+من\s+(?P<sender>.*?)\s+رقم مرجعي\s+(?P<ref>\d+)\s+يوم\s+(?P<date>[\d-]+)\s+الساعة\s+(?P<time>[\d:]+)"
+        debit_card_pattern = r"Your credit card (?:ending with)?#\d+ was charged for EGP\s+(?P<amount>[\d\.,]+)\s+at\s+(?P<merchant>.*?)\s+on\s+(?P<date>[\d/]+)\s+at\s+(?P<time>[\d:]+)"
+    else:
+        deduction_pattern = r"تم تنفيذ تحويل لحظي من حسابكم رقم \d+ بمبلغ (?P<amount>[\d\.]+) جم إلى (?P<receiver>.*?) رقم مرجعي"
+        addition_pattern = r"تم إضافة تحويل لحظي لحسابكم رقم\s+(?P<account>\d+)\s+بمبلغ\s+(?P<amount>[\d\.,]+)\s+جم\s+من\s+(?P<sender>.*?)\s+رقم مرجعي\s+(?P<ref>\d+)\s+يوم\s+(?P<date>[\d-]+)\s+الساعة\s+(?P<time>[\d:]+)"
+        debit_card_pattern = r"تم خصم ([\d\.,]+)EGP.*?عند (.*?) يوم"
+        
     transactions, transfers = [], []
 
     for sms in root.findall('sms'):
@@ -83,7 +89,7 @@ def load_and_process_data(xml_file_path, last_4_digits):
         body = sms.get('body')
         date_str = sms.get('readable_date')
 
-        if address == "BanK-AlAhly":
+        if address == target_bank:
             # Transfers Out
             deduct_match = re.search(deduction_pattern, body)
             if deduct_match:
@@ -114,5 +120,4 @@ def load_and_process_data(xml_file_path, last_4_digits):
                             'Hour': dt.hour, 'Day': dt.day_name(), 'Month': dt.month_name(),
                             'Category': categorize(match.group(2).strip())
                         })
-
     return pd.DataFrame(transactions), pd.DataFrame(transfers)

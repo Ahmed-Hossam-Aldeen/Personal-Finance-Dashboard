@@ -13,10 +13,11 @@ st.title("🏦 NBE Transaction & Transfer Dashboard")
 load_file = st.sidebar.file_uploader("Upload XML File", type="xml")
 
 if load_file is not None:
+    target_bank = st.sidebar.selectbox("Select Target Bank", ["BanK-AlAhly", "CIB"])
     last_4_digits = st.sidebar.text_input("Enter Last 4 Digits of Card", type="password")
-    if last_4_digits is not None and len(last_4_digits) == 4:
+    if last_4_digits is not None and len(last_4_digits) == 4 and target_bank is not None:
         try:
-            df_transactions, df_transfers = load_and_process_data(load_file, last_4_digits)
+            df_transactions, df_transfers = load_and_process_data(load_file, last_4_digits, target_bank)
         except Exception as e:
             st.error(f"Error loading file: {e}")
             st.stop()
