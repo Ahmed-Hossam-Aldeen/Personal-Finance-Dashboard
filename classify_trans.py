@@ -1,6 +1,7 @@
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # --- CATEGORY KEYWORDS CONFIG ---
 CATEGORIES = {
@@ -64,5 +65,5 @@ def categorize(desc: str) -> str:
     for category, keywords in CATEGORIES.items():
         if any(keyword in desc for keyword in keywords):
             return category
-    logging.info(f"Couldn't identify {desc}")        
+    logging.warning(f"Couldn't identify {desc}")        
     return 'Others'
