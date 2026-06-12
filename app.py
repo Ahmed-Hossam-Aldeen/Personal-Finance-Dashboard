@@ -186,7 +186,7 @@ if not df_transactions.empty or not df_transfers.empty:
             st.plotly_chart(fig_freq, width='stretch')
             
         st.subheader("Transaction Details")
-        st.dataframe(df_filtered_trans.sort_values('Date', ascending=False), width='stretch')
+        st.dataframe(df_filtered_trans.sort_values('Date', ascending=False))
 
     # --- TAB 2: TRANSFERS ---
     with tab2:
@@ -258,7 +258,7 @@ if not df_transactions.empty or not df_transfers.empty:
         
         st.divider()
         st.subheader("All Transfers")
-        st.dataframe(df_filtered_transf.sort_values('Date', ascending=False), width='stretch')
+        st.dataframe(df_filtered_transf.sort_values('Date', ascending=False))
 
 
     with tab3:
