@@ -32,9 +32,14 @@ BANK_CONFIGS = {
         ),
         addition_amount_group=2,
         addition_party_group=3,
-        
-        debit_card_pattern=re.compile(
-            r"Your credit card (?:ending with)?#\d+ was charged for EGP\s+(?P<amount>[\d\.,]+)\s+at\s+(?P<merchant>.*?)\s+on\s+(?P<date>[\d/]+)\s+at\s+(?P<time>[\d:]+)"
+
+        debit_card_pattern = re.compile(
+            r"(?:"
+            r"Your credit card (?:ending with)?#\d+ was charged for EGP\s+(?P<amount_en>[\d.,]+)\s+at\s+(?P<merchant_en>.*?)\s+on\s+(?P<date_en>[\d/]+)\s+at\s+(?P<time_en>[\d:]+)"
+            r"|"
+            r"تم خصم مبلغ\s+EGP\s+(?P<amount_ar>[\d.,]+)\s+من بطاقة الخصم المباشر المنتهية بـ\s+\*+\d+\s+عند\s+(?P<merchant_ar>.*?)\s+في\s+(?P<date_ar>[\d/]+)\s+(?P<time_ar>[\d:]+)"
+            r")",
+            re.UNICODE
         ),
         debit_card_amount_group=1,
         debit_card_merchant_group=2
