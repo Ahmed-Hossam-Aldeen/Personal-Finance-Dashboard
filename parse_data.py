@@ -45,7 +45,9 @@ def categorize(desc):
         return 'Home & Electronics'
     
     # 6. Health & Pharmacy
-    elif any(x in desc for x in ['ANEES', 'GYM', 'AFRICANA', 'PHAR', 'MEDI', 'ALMOKHTABAR', 'EZABY', 'SEIF', '19011', 'MISR PHARM', 'VEZEETA']): 
+    elif any(x in desc for x in [
+                'ANEES', 'GYM', 'AFRICANA', 'PHAR', 'PHARMACY', 'MEDI', 'ALMOKHTABAR', 
+                'EZABY','SEIF', '19011', 'PHARM', 'VEZEETA', 'DR', 'HOSPITAL']): 
         return 'Health & Pharmacy'
     
     # 7. Tech & Subs
