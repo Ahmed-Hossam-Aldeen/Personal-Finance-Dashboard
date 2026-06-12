@@ -145,10 +145,10 @@ if not df_transactions.empty or not df_transfers.empty:
         c1, c2 = st.columns(2)
         
         fig_cat = px.pie(df_filtered_trans, values='Amount', names='Category', title="Spending by Category", hole=0.4)
-        c1.plotly_chart(fig_cat, use_container_width=True)
+        c1.plotly_chart(fig_cat, width='stretch')
         
         fig_trend = px.line(df_filtered_trans.sort_values('Date'), x='Date', y='Amount', title="Daily Spending Trend", markers=True)
-        c2.plotly_chart(fig_trend, use_container_width=True)
+        c2.plotly_chart(fig_trend, width='stretch')
 
         top_merch = df_filtered_trans.groupby(['Merchant', 'Category']).agg(
             Amount=('Amount', 'sum'),
@@ -167,7 +167,7 @@ if not df_transactions.empty or not df_transfers.empty:
             title="Top Spending Locations",
             hover_data={'Frequency': True} # This adds the visit count to the popup
     )
-        st.plotly_chart(fig_merch, use_container_width=True)
+        st.plotly_chart(fig_merch, width='stretch')
         # 4. New Section: Frequency Leaderboard
         if not frequent_merch.empty:
             st.subheader("🔁 Habitual Merchants (Visited > 1 time)")
@@ -183,10 +183,10 @@ if not df_transactions.empty or not df_transfers.empty:
                 text='Frequency'
             )
             fig_freq.update_traces(textposition='outside')
-            st.plotly_chart(fig_freq, use_container_width=True)
+            st.plotly_chart(fig_freq, width='stretch')
             
         st.subheader("Transaction Details")
-        st.dataframe(df_filtered_trans.sort_values('Date', ascending=False), use_container_width=True)
+        st.dataframe(df_filtered_trans.sort_values('Date', ascending=False), width='stretch')
 
     # --- TAB 2: TRANSFERS ---
     with tab2:
@@ -204,7 +204,7 @@ if not df_transactions.empty or not df_transfers.empty:
         col4.metric("Total Received", f"{received:,.2f} EGP")
 
         fig_flow = px.histogram(df_filtered_transf, x="Date", y="Amount", color="Type", barmode="group", title="Daily Sent vs Received")
-        st.plotly_chart(fig_flow, use_container_width=True)
+        st.plotly_chart(fig_flow, width='stretch')
         
         # Aggregate both Sum and Count for Sent transfers
         top_sent_parties = df_sent.groupby('Party').agg(
@@ -223,7 +223,7 @@ if not df_transactions.empty or not df_transfers.empty:
             hover_data={'Frequency': True},
             labels={'Total_Amount': 'Total EGP', 'Frequency': 'Times Sent'}
         )
-        st.plotly_chart(fig_sent, use_container_width=True)
+        st.plotly_chart(fig_sent, width='stretch')
 
         # Optional: Show a small leaderboard for frequent recipients
         frequent_sent = top_sent_parties[top_sent_parties['Frequency'] > 1].sort_values('Frequency', ascending=False)
@@ -248,7 +248,7 @@ if not df_transactions.empty or not df_transfers.empty:
             hover_data={'Frequency': True},
             labels={'Total_Amount': 'Total EGP', 'Frequency': 'Times Received'}
         )
-        st.plotly_chart(fig_received, use_container_width=True)
+        st.plotly_chart(fig_received, width='stretch')
 
         # Optional: Show a small leaderboard for frequent senders
         frequent_received = top_received_parties[top_received_parties['Frequency'] > 1].sort_values('Frequency', ascending=False)
@@ -258,7 +258,7 @@ if not df_transactions.empty or not df_transfers.empty:
         
         st.divider()
         st.subheader("All Transfers")
-        st.dataframe(df_filtered_transf.sort_values('Date', ascending=False), use_container_width=True)
+        st.dataframe(df_filtered_transf.sort_values('Date', ascending=False), width='stretch')
 
 
     with tab3:
