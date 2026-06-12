@@ -9,33 +9,52 @@ from datetime import timedelta
 st.set_page_config(page_title="Personal Finance Dashboard", layout="wide")
 
 # --- APP START ---
-st.title("🏦 NBE Transaction & Transfer Dashboard")
+st.title("🏦 Your Transaction & Transfer Dashboard")
 load_file = st.sidebar.file_uploader("Upload XML File", type="xml")
 
 if load_file is not None:
     target_bank = st.sidebar.selectbox("Select Target Bank", ["BanK-AlAhly", "CIB"])
     last_4_digits = st.sidebar.text_input("Enter Last 4 Digits of Card", type="password")
-    if last_4_digits is not None and len(last_4_digits) == 4 and target_bank is not None:
+    if last_4_digits is not None and len(last_4_digits) == 4 and last_4_digits.isdigit() and target_bank is not None:
         try:
             df_transactions, df_transfers = load_and_process_data(load_file, last_4_digits, target_bank)
         except Exception as e:
             st.error(f"Error loading file: {e}")
             st.stop()
     else:
-        st.warning("Please enter the last 4 digits of the card")
+        st.warning("Please enter the last 4 digits of the card to match it with the messages correctly!")
         st.stop()
 else:
-    st.warning("Please upload an XML file containing NBE SMS messages")
+    st.info("### Please upload an XML file containing your SMS messages")
+    st.info("""You can use the [SMS Backup & Restore](https://play.google.com/store/apps/details?id=com.riteshsahu.SMSBackupRestore)
+    application to manage your messages effectively.
+    """)
     st.stop()
 
 # --- TABS ---
 tab1, tab2, tab3 = st.tabs(["🛒 Card Transactions", "💸 Instapay Transfers", "🎯 Monthly Budget"])
 
-# --- SIDEBAR FILTERS ---
-if not df_transactions.empty:
+if not df_transactions.empty or not df_transfers.empty:
+    # Reset date filters if bank or card digits changed to prevent date mismatch errors
+    state_key = f"{target_bank}_{last_4_digits}"
+    if st.session_state.get("last_state_key") != state_key:
+        st.session_state.last_state_key = state_key
+        if "date_input_key" in st.session_state:
+            del st.session_state.date_input_key
+        if "preset_option" in st.session_state:
+            del st.session_state.preset_option
+
     st.sidebar.header("Filter Settings")
-    min_date = min(df_transactions['Date'].min(), df_transfers['Date'].min()).date()
-    max_date = max(df_transactions['Date'].max(), df_transfers['Date'].max()).date() + timedelta(days=1)
+    
+    # Safely compute min and max dates across populated DataFrames
+    dates = []
+    if not df_transactions.empty:
+        dates.extend([df_transactions['Date'].min(), df_transactions['Date'].max()])
+    if not df_transfers.empty:
+        dates.extend([df_transfers['Date'].min(), df_transfers['Date'].max()])
+        
+    min_date = min(dates).date()
+    max_date = (max(dates) + timedelta(days=1)).date()
 
     # Pre-calculate relative preset ranges
     today = datetime.now().date()
@@ -99,7 +118,6 @@ if not df_transactions.empty:
     # Render Custom Date Input
     date_range = st.sidebar.date_input(
         "Select Time Window",
-        value=st.session_state.date_input_key,
         min_value=min_date,
         max_value=max_date,
         key="date_input_key",
@@ -148,7 +166,7 @@ if not df_transactions.empty:
             color='Category', 
             title="Top Spending Locations",
             hover_data={'Frequency': True} # This adds the visit count to the popup
-)
+    )
         st.plotly_chart(fig_merch, use_container_width=True)
         # 4. New Section: Frequency Leaderboard
         if not frequent_merch.empty:
@@ -170,103 +188,103 @@ if not df_transactions.empty:
         st.subheader("Transaction Details")
         st.dataframe(df_filtered_trans.sort_values('Date', ascending=False), use_container_width=True)
 
-# --- TAB 2: TRANSFERS ---
-with tab2:
-    df_received = df_filtered_transf[df_filtered_transf['Type'] == 'Received']
-    df_sent = df_filtered_transf[df_filtered_transf['Type'] == 'Sent']
-    sent = df_sent['Amount'].sum()
-    received = df_received['Amount'].sum()
+    # --- TAB 2: TRANSFERS ---
+    with tab2:
+        df_received = df_filtered_transf[df_filtered_transf['Type'] == 'Received']
+        df_sent = df_filtered_transf[df_filtered_transf['Type'] == 'Sent']
+        sent = df_sent['Amount'].sum()
+        received = df_received['Amount'].sum()
 
-    col1, col2 = st.columns(2)
-    col1.metric("Sent Count", len(df_sent))
-    col2.metric("Received Count", len(df_received))
-    
-    col3, col4 = st.columns(2)
-    col3.metric("Total Sent", f"{sent:,.2f} EGP", delta_color="inverse")
-    col4.metric("Total Received", f"{received:,.2f} EGP")
+        col1, col2 = st.columns(2)
+        col1.metric("Sent Count", len(df_sent))
+        col2.metric("Received Count", len(df_received))
+        
+        col3, col4 = st.columns(2)
+        col3.metric("Total Sent", f"{sent:,.2f} EGP", delta_color="inverse")
+        col4.metric("Total Received", f"{received:,.2f} EGP")
 
-    fig_flow = px.histogram(df_filtered_transf, x="Date", y="Amount", color="Type", barmode="group", title="Daily Sent vs Received")
-    st.plotly_chart(fig_flow, use_container_width=True)
-    
-    # Aggregate both Sum and Count for Sent transfers
-    top_sent_parties = df_sent.groupby('Party').agg(
-        Total_Amount=('Amount', 'sum'),
-        Frequency=('Amount', 'count')
-    ).reset_index().sort_values('Total_Amount', ascending=False)
+        fig_flow = px.histogram(df_filtered_transf, x="Date", y="Amount", color="Type", barmode="group", title="Daily Sent vs Received")
+        st.plotly_chart(fig_flow, use_container_width=True)
+        
+        # Aggregate both Sum and Count for Sent transfers
+        top_sent_parties = df_sent.groupby('Party').agg(
+            Total_Amount=('Amount', 'sum'),
+            Frequency=('Amount', 'count')
+        ).reset_index().sort_values('Total_Amount', ascending=False)
 
-    st.divider()
-    # Bar chart with Frequency in hover data
-    fig_sent = px.bar(
-        top_sent_parties, 
-        x='Party', 
-        y='Total_Amount', 
-        color='Total_Amount', 
-        title="Top Receiving Parties (By Amount)",
-        hover_data={'Frequency': True},
-        labels={'Total_Amount': 'Total EGP', 'Frequency': 'Times Sent'}
-    )
-    st.plotly_chart(fig_sent, use_container_width=True)
+        st.divider()
+        # Bar chart with Frequency in hover data
+        fig_sent = px.bar(
+            top_sent_parties, 
+            x='Party', 
+            y='Total_Amount', 
+            color='Total_Amount', 
+            title="Top Receiving Parties (By Amount)",
+            hover_data={'Frequency': True},
+            labels={'Total_Amount': 'Total EGP', 'Frequency': 'Times Sent'}
+        )
+        st.plotly_chart(fig_sent, use_container_width=True)
 
-    # Optional: Show a small leaderboard for frequent recipients
-    frequent_sent = top_sent_parties[top_sent_parties['Frequency'] > 1].sort_values('Frequency', ascending=False)
-    if not frequent_sent.empty:
-        st.write("🔄 **Frequent Recipients:**")
-        st.dataframe(frequent_sent[['Party', 'Frequency', 'Total_Amount']].head(5), hide_index=True)
-    st.divider()
+        # Optional: Show a small leaderboard for frequent recipients
+        frequent_sent = top_sent_parties[top_sent_parties['Frequency'] > 1].sort_values('Frequency', ascending=False)
+        if not frequent_sent.empty:
+            st.write("🔄 **Frequent Recipients:**")
+            st.dataframe(frequent_sent[['Party', 'Frequency', 'Total_Amount']].head(5), hide_index=True)
+        st.divider()
 
-    # Aggregate both Sum and Count for Received transfers
-    top_received_parties = df_received.groupby('Party').agg(
-        Total_Amount=('Amount', 'sum'),
-        Frequency=('Amount', 'count')
-    ).reset_index().sort_values('Total_Amount', ascending=False)
+        # Aggregate both Sum and Count for Received transfers
+        top_received_parties = df_received.groupby('Party').agg(
+            Total_Amount=('Amount', 'sum'),
+            Frequency=('Amount', 'count')
+        ).reset_index().sort_values('Total_Amount', ascending=False)
 
-    # Bar chart with Frequency in hover data
-    fig_received = px.bar(
-        top_received_parties, 
-        x='Party', 
-        y='Total_Amount', 
-        color='Total_Amount', 
-        title="Top Sending Parties (By Amount)",
-        hover_data={'Frequency': True},
-        labels={'Total_Amount': 'Total EGP', 'Frequency': 'Times Received'}
-    )
-    st.plotly_chart(fig_received, use_container_width=True)
+        # Bar chart with Frequency in hover data
+        fig_received = px.bar(
+            top_received_parties, 
+            x='Party', 
+            y='Total_Amount', 
+            color='Total_Amount', 
+            title="Top Sending Parties (By Amount)",
+            hover_data={'Frequency': True},
+            labels={'Total_Amount': 'Total EGP', 'Frequency': 'Times Received'}
+        )
+        st.plotly_chart(fig_received, use_container_width=True)
 
-    # Optional: Show a small leaderboard for frequent senders
-    frequent_received = top_received_parties[top_received_parties['Frequency'] > 1].sort_values('Frequency', ascending=False)
-    if not frequent_received.empty:
-        st.write("📩 **Frequent Senders:**")
-        st.dataframe(frequent_received[['Party', 'Frequency', 'Total_Amount']].head(5), hide_index=True)
-    
-    st.divider()
-    st.subheader("All Transfers")
-    st.dataframe(df_filtered_transf.sort_values('Date', ascending=False), use_container_width=True)
+        # Optional: Show a small leaderboard for frequent senders
+        frequent_received = top_received_parties[top_received_parties['Frequency'] > 1].sort_values('Frequency', ascending=False)
+        if not frequent_received.empty:
+            st.write("📩 **Frequent Senders:**")
+            st.dataframe(frequent_received[['Party', 'Frequency', 'Total_Amount']].head(5), hide_index=True)
+        
+        st.divider()
+        st.subheader("All Transfers")
+        st.dataframe(df_filtered_transf.sort_values('Date', ascending=False), use_container_width=True)
 
 
-with tab3:
-    st.subheader("Monthly Budget")
-    df_sent = df_filtered_transf[df_filtered_transf['Type'] == 'Sent']
+    with tab3:
+        st.subheader("Monthly Budget")
+        df_sent = df_filtered_transf[df_filtered_transf['Type'] == 'Sent']
 
-    budget = st.slider("Select Budget", min_value=0, max_value=100000, value=7000, step=500)
-    fixed_expenses = st.number_input("Duplicated Expenses", value=7000)
-    purchases = int(df_filtered_trans['Amount'].sum())
-    transfers = int(df_sent['Amount'].sum()) 
-    
-    total_spent_raw = purchases + transfers
-    total_spent = total_spent_raw - fixed_expenses
-    remaining = budget - total_spent
+        budget = st.slider("Select Budget", min_value=0, max_value=100000, value=7000, step=500)
+        fixed_expenses = st.number_input("Duplicated Expenses", value=7000)
+        purchases = int(df_filtered_trans['Amount'].sum())
+        transfers = int(df_sent['Amount'].sum()) 
+        
+        total_spent_raw = purchases + transfers
+        total_spent = total_spent_raw - fixed_expenses
+        remaining = budget - total_spent
 
-    st.markdown("### 📊 Financial Overview")
-    col1, col2, col3, col4 = st.columns(4)
-    
-    col1.metric("🛒 Purchases", f"{purchases} EGP")
-    col2.metric("💸 Transfers", f"{transfers} EGP")
-    col3.metric("🧾 Total Spent", f"{total_spent} EGP", help="Purchases + Transfers - Fixed Expenses")
-    
-    delta_text = f"{(remaining / budget) * 100:.1f}% left" if budget > 0 else ""
-    col4.metric("💰 Remaining", f"{remaining} EGP", delta=delta_text, delta_color="normal")
+        st.markdown("### 📊 Financial Overview")
+        col1, col2, col3, col4 = st.columns(4)
+        
+        col1.metric("🛒 Purchases", f"{purchases} EGP")
+        col2.metric("💸 Transfers", f"{transfers} EGP")
+        col3.metric("🧾 Total Spent", f"{total_spent} EGP", help="Purchases + Transfers - Fixed Expenses")
+        
+        delta_text = f"{(remaining / budget) * 100:.1f}% left" if budget > 0 else ""
+        col4.metric("💰 Remaining", f"{remaining} EGP", delta=delta_text, delta_color="normal")
 
-    # Add a visual progress bar for budget usage
-    budget_usage_pct = (total_spent / budget) if budget > 0 else 0.0
-    st.markdown(f"**Budget Usage:** `{max(0, budget_usage_pct * 100):.1f}%`")
-    st.progress(min(max(budget_usage_pct, 0.0), 1.0))
+        # Add a visual progress bar for budget usage
+        budget_usage_pct = (total_spent / budget) if budget > 0 else 0.0
+        st.markdown(f"**Budget Usage:** `{max(0, budget_usage_pct * 100):.1f}%`")
+        st.progress(min(max(budget_usage_pct, 0.0), 1.0))

@@ -1,125 +1,140 @@
+import streamlit as st
 import pandas as pd
 import xml.etree.ElementTree as ET
-import streamlit as st
-import re
+from typing import Optional
+from banks_config import *
+from classify_trans import *
 
-def categorize(desc):
-    if '*' in desc:
-        desc = desc.split('*')[1]
-        print(desc)
-    desc = desc.upper()
-    
-    # 1. Fees & Government
-    if any(x in desc for x in ['FOREIGN EXCHANGE', 'PASSPORT', 'FEES', 'COMMISSION', 'STAMP', 'TAX', 'RENEWAL', 'TRAFFIC', 'AMAN', 'EGYPTIAN CUSTOM']): 
-        return 'Fees'
-    
-    # 2. Cash & ATM
-    elif any(x in desc for x in ['ATM','NATIONAL BANK OF EGYPT', 'DAR EL SALAM', 'CIB', 'QNB','BM', 'BANQUE MISR', 'WITHDRAWAL']): 
-        return 'ATM'
-    
-    # 3. Groceries & Food
-    elif any(x in desc for x in [
-        'BREADFAST', 'DEE POINT', 'FOOD', 'METRO', 'KAZYON', 'ASWAQ', 'NADA', 'TALABAT', 'SPINNEYS','MARKT', 'MARKET',
-        'SUPERMRKT', 'HAWARY', 'CARREFOUR', 'PIZZA', 'COFFEE', 'ROOSTERS', 'SEOUDI', 'LULU', 'ALFA', 'LYFE',
-        'AGA', 'SECOND CUP', 'ETOILE', 'BAZOOKA', 'COOK DOOR', 'MCDONALDS', 'KFC', 'BURGER KING', 'MOLLYS',
-        'KATURA', 'BEANOS', 'CILANTRO', 'CAFE', 'WOK', 'TRUCK', 'BREW', 'ELMADENA ALMONWARA','ELMADINA ',
-        'GOMLA', 'FATHALLA', 'COSTA', 'CINNABON', 'ELABD', 'STARBUCKS', 'DUNKIN', 'BAKERY', 'LAMOAGHZA',
-        'ABU AUF', 'QAHWA', 'ESPRESSO', 'BAKE', '1980', 'GOURMET', 'FOAM', 'SIP', 'ICE CREAM', 'MANDARINE','ELKEBIR',
-        'WHAT THE TRUC', '30 NORTH', 'MASHWY', 'BEST BUY', 'ARDNA','RDNA', 'TEA', 'ABW BRYN'
-    ]): 
-        return 'Groceries & Food'
+# --- CUSTOM EXCEPTIONS ---
+class DataParsingError(Exception):
+    """Base exception for data parsing errors."""
+    pass
 
-    # 4. Clothing & Shopping
-    elif any(x in desc for x in [
-        'LC WAIKIKI', 'MAX', 'SHOES', 'SCARVES', 'CLOTHIN', 'DICE', 'LEATHER', 'DEFACTO', 'COTONIL', 
-        'BAHYA', 'HEGABE', 'ZARA', 'H&M', 'AMAZON', 'JUMIA', 'BERSHKA', 'STRADIVARIUS', 'PULL & BEAR', 
-        'ALDO', 'MISS DIVA', 'TIMBERLAND', 'ADIDAS', 'NIKE', 'FRAGRA', 'DECATHLON', 'CLOTHES'
-    ]): 
-        return 'Clothing & Shopping'
-    
-    # 5. Home & Electronics
-    elif any(x in desc for x in [
-        'IKEA', 'ELTAWHEED', 'HOME', 'DREAM 2000', 'SELECT', 'EL ARABY', 'SHARAF DG', 'B TECH', 
-        'KIRIAZI', 'LIZARHOME', '2B', 'TRADELINE', 'DREAM'
-    ]): 
-        return 'Home & Electronics'
-    
-    # 6. Health & Pharmacy
-    elif any(x in desc for x in [
-                'ANEES', 'GYM', 'AFRICANA', 'PHAR', 'PHARMACY', 'MEDI', 'ALMOKHTABAR', 
-                'EZABY','SEIF', '19011', 'PHARM', 'VEZEETA', 'DR', 'HOSPITAL']): 
-        return 'Health & Pharmacy'
-    
-    # 7. Tech & Subs
-    elif any(x in desc for x in ['ELSAWY','GOOGLE', 'GETCONTACT', 'NETFLIX', 'SPOTIFY', 'MICROSOFT', 'OPENAI', 'LINKEDIN', 'APPLE', 'ITUNES']): 
-        return 'Entertainment & Subs'
-    
-    # 8. Investment & Finance
-    elif any(x in desc for x in ['FINANCE','THNDR', 'JEW', 'HALAN', 'EFG', 'VALU', 'HERMES', 'MISR CAP']): 
-        return 'Investment'
-    
-    # 9. Telecom
-    elif any(x in desc for x in ['ETISALAT', 'VODAFONE', 'ORANGE', 'WE ', 'TE DATA', 'MYFAWRY']): 
-        return 'Telecom'
-        
-    # 10. Transportation
-    elif any(x in desc for x in ['UBER', 'DIDY', 'INDRIVE', 'SWVL', 'CAREEM']): 
-        return 'Transportation'
-    
-    else: 
-        return 'Others'
+class CardDigitsNotFoundError(DataParsingError):
+    """Exception raised when the provided card digits do not match any transactions."""
+    pass
+
+
+
+def parse_date(date_str: Optional[str], epoch_str: Optional[str]) -> pd.Timestamp:
+    """Parses SMS dates with fallback options to handle varied locales and formats."""
+    if date_str:
+        for fmt in ('%b %d, %Y %I:%M:%S %p', '%d/%m/%Y %I:%M:%S %p', '%Y-%m-%d %H:%M:%S'):
+            try:
+                return pd.to_datetime(date_str, format=fmt)
+            except (ValueError, TypeError):
+                continue
+        try:
+            return pd.to_datetime(date_str)
+        except (ValueError, TypeError):
+            pass
+
+    if epoch_str:
+        try:
+            return pd.to_datetime(int(epoch_str), unit='ms')
+        except (ValueError, TypeError):
+            pass
+
+    return pd.Timestamp.now()
 
 @st.cache_data
-def load_and_process_data(xml_file_path, last_4_digits, target_bank):
+def load_and_process_data(xml_file, last_4_digits: str, target_bank: str):
+    """Parses and loads bank transaction/transfer data from the uploaded XML file."""
+    try:
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
+    except ET.ParseError as e:
+        raise DataParsingError(f"Malformed XML file structure: {e}")
+    except Exception as e:
+        raise DataParsingError(f"Failed to read XML document: {e}")
 
-    tree = ET.parse(xml_file_path)
-    root = tree.getroot()
+    config = BANK_CONFIGS.get(target_bank)
+    if not config:
+        raise DataParsingError(f"Unsupported bank option: {target_bank}")
 
-    if target_bank == 'CIB':
-        deduction_pattern = r"يرجى العلم انه تم تنفيذ تحويل لحظي بمبلغ\s+(?P<amount>[\d\.,]+)\s+جم من حسابك المنتهي بـ\s+(?P<account_last_4>.*?\d+) برقم مرجعي\s+(?P<ref>\w+) بتاريخ\s+(?P<date>[\d-]+)\s+(?P<time>[\d:]+)"
-        addition_pattern = r"تم إضافة تحويل لحظي لحسابكم رقم\s+(?P<account>\d+)\s+بمبلغ\s+(?P<amount>[\d\.,]+)\s+جم\s+من\s+(?P<sender>.*?)\s+رقم مرجعي\s+(?P<ref>\d+)\s+يوم\s+(?P<date>[\d-]+)\s+الساعة\s+(?P<time>[\d:]+)"
-        debit_card_pattern = r"Your credit card (?:ending with)?#\d+ was charged for EGP\s+(?P<amount>[\d\.,]+)\s+at\s+(?P<merchant>.*?)\s+on\s+(?P<date>[\d/]+)\s+at\s+(?P<time>[\d:]+)"
-    else:
-        deduction_pattern = r"تم تنفيذ تحويل لحظي من حسابكم رقم \d+ بمبلغ (?P<amount>[\d\.]+) جم إلى (?P<receiver>.*?) رقم مرجعي"
-        addition_pattern = r"تم إضافة تحويل لحظي لحسابكم رقم\s+(?P<account>\d+)\s+بمبلغ\s+(?P<amount>[\d\.,]+)\s+جم\s+من\s+(?P<sender>.*?)\s+رقم مرجعي\s+(?P<ref>\d+)\s+يوم\s+(?P<date>[\d-]+)\s+الساعة\s+(?P<time>[\d:]+)"
-        debit_card_pattern = r"تم خصم ([\d\.,]+)EGP.*?عند (.*?) يوم"
-        
     transactions, transfers = [], []
+    is_last_4_digits_found = False
 
     for sms in root.findall('sms'):
         address = sms.get('address')
-        body = sms.get('body')
+        body = sms.get('body', '')
         date_str = sms.get('readable_date')
+        epoch_str = sms.get('date')
 
         if address == target_bank:
             # Transfers Out
-            deduct_match = re.search(deduction_pattern, body)
+            deduct_match = config.deduction_pattern.search(body)
             if deduct_match:
-                dt = pd.to_datetime(date_str, format='%b %d, %Y %I:%M:%S %p')
-                transfers.append({
-                    'Date': dt, 'Type': 'Sent', 'Amount': float(deduct_match.group(1)),
-                    'Party': deduct_match.group(2), 'Hour': dt.hour, 'Day': dt.day_name(), 'Month': dt.month_name()
-                })
+                dt = parse_date(date_str, epoch_str)
+                try:
+                    amount_str = deduct_match.group(config.deduction_amount_group).replace(',', '')
+                    amount = float(amount_str)
+                    party = deduct_match.group(config.deduction_party_group).strip()
+                    transfers.append({
+                        'Date': dt, 'Type': 'Sent', 'Amount': amount,
+                        'Party': party, 'Hour': dt.hour, 'Day': dt.day_name(), 'Month': dt.month_name()
+                    })
+                except (ValueError, IndexError, AttributeError):
+                    pass
 
             # Transfers In
-            add_match = re.search(addition_pattern, body)
+            add_match = config.addition_pattern.search(body)
             if add_match:
-                dt = pd.to_datetime(date_str, format='%b %d, %Y %I:%M:%S %p')
-                transfers.append({
-                    'Date': dt, 'Type': 'Received', 'Amount': float(add_match.group(2).replace(',', '')),
-                    'Party': add_match.group(3), 'Hour': dt.hour, 'Day': dt.day_name(), 'Month': dt.month_name()
-                })
+                dt = parse_date(date_str, epoch_str)
+                try:
+                    amount_str = add_match.group(config.addition_amount_group).replace(',', '')
+                    amount = float(amount_str)
+                    party = add_match.group(config.addition_party_group).strip()
+                    transfers.append({
+                        'Date': dt, 'Type': 'Received', 'Amount': amount,
+                        'Party': party, 'Hour': dt.hour, 'Day': dt.day_name(), 'Month': dt.month_name()
+                    })
+                except (ValueError, IndexError, AttributeError):
+                    pass
 
             # Card Transactions
             if last_4_digits in body:
-                match = re.search(debit_card_pattern, body)
+                match = config.debit_card_pattern.search(body)
                 if match:
-                    amount = float(match.group(1).replace(',', ''))
-                    if amount > 0:
-                        dt = pd.to_datetime(date_str, format='%b %d, %Y %I:%M:%S %p')
-                        transactions.append({
-                            'Date': dt, 'Amount': amount, 'Merchant': match.group(2).strip(),
-                            'Hour': dt.hour, 'Day': dt.day_name(), 'Month': dt.month_name(),
-                            'Category': categorize(match.group(2).strip())
-                        })
-    return pd.DataFrame(transactions), pd.DataFrame(transfers)
+                    is_last_4_digits_found = True
+                    try:
+                        amount_str = match.group(config.debit_card_amount_group).replace(',', '')
+                        amount = float(amount_str)
+                        if amount > 0:
+                            dt = parse_date(date_str, epoch_str)
+                            merchant = match.group(config.debit_card_merchant_group).strip()
+                            transactions.append({
+                                'Date': dt, 'Amount': amount, 'Merchant': merchant,
+                                'Hour': dt.hour, 'Day': dt.day_name(), 'Month': dt.month_name(),
+                                'Category': categorize(merchant)
+                            })
+                    except (ValueError, IndexError, AttributeError):
+                        pass
+
+    if not is_last_4_digits_found:
+        raise CardDigitsNotFoundError(
+            f"No card transactions detected for card ending with '{last_4_digits}' in your {target_bank} messages."
+        )
+
+    trans_cols = ['Date', 'Amount', 'Merchant', 'Hour', 'Day', 'Month', 'Category']
+    transfer_cols = ['Date', 'Type', 'Amount', 'Party', 'Hour', 'Day', 'Month']
+
+    df_trans = pd.DataFrame(transactions)
+    if df_trans.empty:
+        df_trans = pd.DataFrame(columns=trans_cols)
+    else:
+        # Ensure all required columns are present
+        for col in trans_cols:
+            if col not in df_trans.columns:
+                df_trans[col] = pd.Series(dtype='object')
+
+    df_tranf = pd.DataFrame(transfers)
+    if df_tranf.empty:
+        df_tranf = pd.DataFrame(columns=transfer_cols)
+    else:
+        # Ensure all required columns are present
+        for col in transfer_cols:
+            if col not in df_tranf.columns:
+                df_tranf[col] = pd.Series(dtype='object')
+
+    return df_trans, df_tranf
