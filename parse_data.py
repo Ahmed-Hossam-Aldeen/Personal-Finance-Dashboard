@@ -94,7 +94,12 @@ def load_and_process_data(xml_file, last_4_digits: str, target_bank: str):
 
             # Card Transactions
             if last_4_digits in body:
-                match = config.debit_card_pattern.search(body)
+                match = None
+                if config.english_card_pattern:
+                    match = config.english_card_pattern.search(body)
+                if not match and config.arabic_card_pattern:
+                    match = config.arabic_card_pattern.search(body)  
+
                 if match:
                     is_last_4_digits_found = True
                     try:
@@ -108,8 +113,10 @@ def load_and_process_data(xml_file, last_4_digits: str, target_bank: str):
                                 'Hour': dt.hour, 'Day': dt.day_name(), 'Month': dt.month_name(),
                                 'Category': categorize(merchant)
                             })
-                    except (ValueError, IndexError, AttributeError):
-                        pass
+                    except Exception as e:
+                        logging.warning(
+                            f"Failed parsing card transaction: {body[:100]}... Error: {e}"
+                        )
 
     if not is_last_4_digits_found:
         raise CardDigitsNotFoundError(
