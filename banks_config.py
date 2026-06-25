@@ -69,7 +69,7 @@ BANK_CONFIGS = {
         addition_party_group=3,
         
        arabic_card_pattern=re.compile(
-            r"تم خصم (?P<amount>[\d\.,]+)EGP.*?عند (?P<merchant>.*?) يوم"
+            r"تم خصم (?P<amount>[\d\.,]+)\s*EGP.*?عند (?P<merchant>.*?) يوم"
         ),
         debit_card_amount_group="amount",
         debit_card_merchant_group="merchant"
