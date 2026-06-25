@@ -7,7 +7,7 @@ logger.setLevel(logging.INFO)
 CATEGORIES = {
     'Fees': [
         'FOREIGN EXCHANGE', 'PASSPORT', 'FEES', 'COMMISSION', 'STAMP', 'TAX', 
-        'RENEWAL', 'TRAFFIC', 'AMAN', 'EGYPTIAN CUSTOM'
+        'RENEWAL', 'TRAFFIC', 'AMAN', 'EGYPTIAN CUSTOM', 'NEQABTY'
     ],
     'ATM': [
         'ATM', 'NATIONAL BANK OF EGYPT', 'DAR EL SALAM', 'CIB', 'QNB', 'BM', 
@@ -24,11 +24,11 @@ CATEGORIES = {
         'STARBUCKS', 'DUNKIN', 'BAKERY', 'LAMOAGHZA', 'ABU AUF', 'QAHWA', 
         'ESPRESSO', 'BAKE', '1980', 'GOURMET', 'FOAM', 'SIP', 'ICE CREAM', 
         'MANDARINE', 'ELKEBIR', 'WHAT THE TRUC', '30 NORTH', 'MASHWY', 
-        'BEST BUY', 'ARDNA', 'RDNA', 'TEA', 'ABW BRYN'
+        'BEST BUY', 'ARDNA', 'RDNA', 'TEA', 'ABW BRYN','KUFTA', 'KOUEIDER'
     ],
     'Clothing & Shopping': [
         'LC WAIKIKI', 'MAX', 'SHOES', 'SCARVES', 'CLOTHIN', 'DICE', 'LEATHER', 
-        'DEFACTO', 'COTONIL', 'BAHYA', 'HEGABE', 'ZARA', 'H&M', 'AMAZON', 
+        'DEFACTO', 'MINTRA', 'COTONIL', 'BAHYA', 'HEGABE', 'ZARA', 'H&M', 'AMAZON', 
         'JUMIA', 'BERSHKA', 'STRADIVARIUS', 'PULL & BEAR', 'ALDO', 'MISS DIVA', 
         'TIMBERLAND', 'ADIDAS', 'NIKE', 'FRAGRA', 'DECATHLON', 'CLOTHES'
     ],
