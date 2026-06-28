@@ -24,7 +24,8 @@ CATEGORIES = {
         'STARBUCKS', 'DUNKIN', 'BAKERY', 'LAMOAGHZA', 'ABU AUF', 'QAHWA', 
         'ESPRESSO', 'BAKE', '1980', 'GOURMET', 'FOAM', 'SIP', 'ICE CREAM', 
         'MANDARINE', 'ELKEBIR', 'WHAT THE TRUC', '30 NORTH', 'MASHWY', 
-        'BEST BUY', 'ARDNA', 'RDNA', 'TEA', 'ABW BRYN','KUFTA', 'KOUEIDER'
+        'BEST BUY', 'ARDNA', 'RDNA', 'TEA', 'ABW BRYN','KUFTA', 'KOUEIDER',
+        'CIRCLE K', 'GELATO', 'MAYYAL'
     ],
     'Clothing & Shopping': [
         'LC WAIKIKI', 'MAX', 'SHOES', 'SCARVES', 'CLOTHIN', 'DICE', 'LEATHER', 
@@ -39,11 +40,11 @@ CATEGORIES = {
     ],
     'Health & Pharmacy': [
         'ANEES', 'GYM', 'AFRICANA', 'PHAR', 'PHARMACY', 'MEDI', 'ALMOKHTABAR', 
-        'EZABY', 'SEIF', '19011', 'PHARM', 'VEZEETA', 'DR', 'HOSPITAL'
+        'EZABY', 'SEIF', '19011', 'PHARM', 'VEZEETA', 'DR', 'HOSPITAL', 
     ],
     'Entertainment & Subs': [
         'ELSAWY', 'GOOGLE', 'GETCONTACT', 'NETFLIX', 'SPOTIFY', 'MICROSOFT', 
-        'OPENAI', 'LINKEDIN', 'APPLE', 'ITUNES'
+        'OPENAI', 'LINKEDIN', 'APPLE', 'ITUNES', 'ACADEMY'
     ],
     'Investment': [
         'FINANCE', 'THNDR', 'JEW', 'HALAN', 'EFG', 'VALU', 'HERMES', 'MISR CAP'
