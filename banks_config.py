@@ -73,5 +73,25 @@ BANK_CONFIGS = {
         ),
         debit_card_amount_group="amount",
         debit_card_merchant_group="merchant"
+    ),
+    'AAIB': BankConfig(
+        deduction_pattern=re.compile(
+            r"Transfer reference #(?P<ref>\w+) of EGP\s+(?P<amount>[\d,\.]+)\s+has been debited from your account\s+(?P<account>[\w-]+)\s+through\s+(?P<channel>\w+)\s+on\s+(?P<date>[\d/]+)\s+at\s+(?P<time>[\d:]+)"
+        ),
+        deduction_amount_group=2,
+        deduction_party_group=3,
+
+        addition_pattern=re.compile(
+            r"You have received a transfer reference #(?P<ref>\w+) with EGP\s+(?P<amount>[\d,\.]+)\s+from\s+(?P<sender>.+?)\s+through\s+(?P<channel>\w+)\s+on\s+(?P<date>[\d/]+)\s+at\s+(?P<time>[\d:]+)"
+        ),
+        addition_amount_group=2,
+        addition_party_group=3,
+
+        english_card_pattern=re.compile(
+            r"Your debit card \*+\d+\s+was debited by EGP\s+(?P<amount>[\d,\.]+)\s+at\s+(?P<merchant>.+?)\.\s+Available balance"
+        ),
+
+        debit_card_amount_group="amount",
+        debit_card_merchant_group="merchant"
     )
 }

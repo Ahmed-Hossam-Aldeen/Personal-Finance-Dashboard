@@ -13,7 +13,7 @@ st.title("🏦 Your Transaction & Transfer Dashboard")
 load_file = st.sidebar.file_uploader("Upload XML File", type="xml")
 
 if load_file is not None:
-    target_bank = st.sidebar.selectbox("Select Target Bank", ["BanK-AlAhly", "CIB"])
+    target_bank = st.sidebar.selectbox("Select Target Bank", ["BanK-AlAhly", "CIB", "AAIB"])
     last_4_digits = st.sidebar.text_input("Enter Last 4 Digits of Card", type="password")
     if last_4_digits is not None and len(last_4_digits) == 4 and last_4_digits.isdigit() and target_bank is not None:
         try:
