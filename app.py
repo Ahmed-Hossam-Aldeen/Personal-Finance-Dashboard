@@ -265,8 +265,8 @@ if not df_transactions.empty or not df_transfers.empty:
         st.subheader("Monthly Budget")
         df_sent = df_filtered_transf[df_filtered_transf['Type'] == 'Sent']
 
-        budget = st.slider("Select Budget", min_value=0, max_value=100000, value=7000, step=500)
-        fixed_expenses = st.number_input("Duplicated Expenses", value=7000)
+        budget = st.slider("Select Budget", min_value=1000, max_value=70000, value=7000, step=500)
+        fixed_expenses = st.number_input("Duplicated Expenses", value=0)
         purchases = int(df_filtered_trans['Amount'].sum())
         transfers = int(df_sent['Amount'].sum()) 
         
