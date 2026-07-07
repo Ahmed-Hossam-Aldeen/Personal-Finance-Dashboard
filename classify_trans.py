@@ -7,7 +7,7 @@ logger.setLevel(logging.INFO)
 CATEGORIES = {
     'Fees': [
         'FOREIGN EXCHANGE', 'PASSPORT', 'FEES', 'COMMISSION', 'STAMP', 'TAX', 
-        'RENEWAL', 'TRAFFIC', 'AMAN', 'EGYPTIAN CUSTOM', 'NEQABTY'
+        'RENEWAL', 'TRAFFIC', 'AMAN', 'EGYPTIAN CUSTOM', 'NEQABTY', 'PENSION'
     ],
     'ATM': [
         'ATM', 'NATIONAL BANK OF EGYPT', 'DAR EL SALAM', 'CIB', 'QNB', 'BM', 
@@ -25,7 +25,7 @@ CATEGORIES = {
         'ESPRESSO', 'BAKE', '1980', 'GOURMET', 'FOAM', 'SIP', 'ICE CREAM', 
         'MANDARINE', 'ELKEBIR', 'WHAT THE TRUC', '30 NORTH', 'MASHWY', 
         'BEST BUY', 'ARDNA', 'RDNA', 'TEA', 'ABW BRYN','KUFTA', 'KOUEIDER',
-        'CIRCLE K', 'GELATO', 'MAYYAL'
+        'CIRCLE K', 'GELATO', 'MAYYAL', 'ABO ANAS', 'MA', 'KOWAYDA'
     ],
     'Clothing & Shopping': [
         'LC WAIKIKI', 'MAX', 'SHOES', 'SCARVES', 'CLOTHIN', 'DICE', 'LEATHER', 
