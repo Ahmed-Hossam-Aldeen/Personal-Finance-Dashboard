@@ -13,6 +13,9 @@ CATEGORIES = {
         'ATM', 'NATIONAL BANK OF EGYPT', 'DAR EL SALAM', 'CIB', 'QNB', 'BM', 
         'BANQUE MISR', 'WITHDRAWAL'
     ],
+    'Investment': [
+        'FINANCE', 'THNDR', 'JEW', 'HALAN', 'EFG', 'VALU', 'HERMES', 'MISR CAP'
+    ],
     'Groceries & Food': [
         'BREADFAST', 'DEE POINT', 'FOOD', 'METRO', 'KAZYON', 'ASWAQ', 'NADA', 
         'TALABAT', 'SPINNEYS', 'MARKT', 'MARKET', 'SUPERMRKT', 'HAWARY', 
@@ -45,9 +48,6 @@ CATEGORIES = {
     'Entertainment & Subs': [
         'ELSAWY', 'GOOGLE', 'GETCONTACT', 'NETFLIX', 'SPOTIFY', 'MICROSOFT', 
         'OPENAI', 'LINKEDIN', 'APPLE', 'ITUNES', 'ACADEMY'
-    ],
-    'Investment': [
-        'FINANCE', 'THNDR', 'JEW', 'HALAN', 'EFG', 'VALU', 'HERMES', 'MISR CAP'
     ],
     'Telecom': [
         'ETISALAT', 'VODAFONE', 'ORANGE', 'WE ', 'TE DATA', 'MYFAWRY'
