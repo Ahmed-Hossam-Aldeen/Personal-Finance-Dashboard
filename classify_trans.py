@@ -7,7 +7,11 @@ logger.setLevel(logging.INFO)
 CATEGORIES = {
     'Fees': [
         'FOREIGN EXCHANGE', 'PASSPORT', 'FEES', 'COMMISSION', 'STAMP', 'TAX', 
-        'RENEWAL', 'TRAFFIC', 'AMAN', 'EGYPTIAN CUSTOM', 'NEQABTY', 'PENSION'
+        'RENEWAL', 'TRAFFIC', 'AMAN', 'EGYPTIAN CUSTOM', 'NEQABTY', 'PENSION', 'ABYAR'
+    ],
+    'Entertainment & Subs': [
+        'ELSAWY', 'GOOGLE', 'GETCONTACT', 'NETFLIX', 'SPOTIFY', 'MICROSOFT', 
+        'OPENAI', 'LINKEDIN', 'APPLE', 'ITUNES', 'ACADEMY', 'THEMES'
     ],
     'ATM': [
         'ATM', 'NATIONAL BANK OF EGYPT', 'DAR EL SALAM', 'CIB', 'QNB', 'BM', 
@@ -16,6 +20,11 @@ CATEGORIES = {
     'Investment': [
         'FINANCE', 'THNDR', 'JEW', 'HALAN', 'EFG', 'VALU', 'HERMES', 'MISR CAP'
     ],
+    'Home & Electronics': [
+        'IKEA', 'ELTAWHEED', 'HOME', 'DREAM 2000', 'SELECT', 'EL ARABY', 
+        'SHARAF DG', 'B TECH', 'KIRIAZI', 'LIZARHOME', '2B', 'TRADELINE', 
+        'DREAM'
+    ],
     'Groceries & Food': [
         'BREADFAST', 'DEE POINT', 'FOOD', 'METRO', 'KAZYON', 'ASWAQ', 'NADA', 
         'TALABAT', 'SPINNEYS', 'MARKT', 'MARKET', 'SUPERMRKT', 'HAWARY', 
@@ -23,12 +32,13 @@ CATEGORIES = {
         'LYFE', 'AGA', 'SECOND CUP', 'ETOILE', 'BAZOOKA', 'COOK DOOR', 
         'MCDONALDS', 'KFC', 'BURGER KING', 'MOLLYS', 'KATURA', 'BEANOS', 
         'CILANTRO', 'CAFE', 'WOK', 'TRUCK', 'BREW', 'ELMADENA ALMONWARA', 
-        'ELMADINA ', 'GOMLA', 'FATHALLA', 'COSTA', 'CINNABON', 'ELABD', 
+        'ELMADENA','ELMADINA', 'GOMLA', 'FATHALLA', 'COSTA', 'CINNABON', 'ELABD', 
         'STARBUCKS', 'DUNKIN', 'BAKERY', 'LAMOAGHZA', 'ABU AUF', 'QAHWA', 
         'ESPRESSO', 'BAKE', '1980', 'GOURMET', 'FOAM', 'SIP', 'ICE CREAM', 
         'MANDARINE', 'ELKEBIR', 'WHAT THE TRUC', '30 NORTH', 'MASHWY', 
         'BEST BUY', 'ARDNA', 'RDNA', 'TEA', 'ABW BRYN','KUFTA', 'KOUEIDER',
-        'CIRCLE K', 'GELATO', 'MAYYAL', 'ABO ANAS', 'MA', 'KOWAYDA'
+        'CIRCLE K', 'GELATO', 'MAYYAL', 'ABO ANAS', 'KOWAYDA',
+        'LOKALI', 'VASKO', 'ZAHIO', 'ALAMYR'
     ],
     'Clothing & Shopping': [
         'LC WAIKIKI', 'MAX', 'SHOES', 'SCARVES', 'CLOTHIN', 'DICE', 'LEATHER', 
@@ -36,18 +46,9 @@ CATEGORIES = {
         'JUMIA', 'BERSHKA', 'STRADIVARIUS', 'PULL & BEAR', 'ALDO', 'MISS DIVA', 
         'TIMBERLAND', 'ADIDAS', 'NIKE', 'FRAGRA', 'DECATHLON', 'CLOTHES'
     ],
-    'Home & Electronics': [
-        'IKEA', 'ELTAWHEED', 'HOME', 'DREAM 2000', 'SELECT', 'EL ARABY', 
-        'SHARAF DG', 'B TECH', 'KIRIAZI', 'LIZARHOME', '2B', 'TRADELINE', 
-        'DREAM'
-    ],
     'Health & Pharmacy': [
         'ANEES', 'GYM', 'AFRICANA', 'PHAR', 'PHARMACY', 'MEDI', 'ALMOKHTABAR', 
-        'EZABY', 'SEIF', '19011', 'PHARM', 'VEZEETA', 'DR', 'HOSPITAL', 
-    ],
-    'Entertainment & Subs': [
-        'ELSAWY', 'GOOGLE', 'GETCONTACT', 'NETFLIX', 'SPOTIFY', 'MICROSOFT', 
-        'OPENAI', 'LINKEDIN', 'APPLE', 'ITUNES', 'ACADEMY'
+        'EZABY', 'SEIF', '19011', 'PHARM', 'VEZEETA', 'DR', 'HOSPITAL', 'LASELIA'
     ],
     'Telecom': [
         'ETISALAT', 'VODAFONE', 'ORANGE', 'WE ', 'TE DATA', 'MYFAWRY'
