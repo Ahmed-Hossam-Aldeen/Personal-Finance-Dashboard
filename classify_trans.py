@@ -11,7 +11,7 @@ CATEGORIES = {
     ],
     'Entertainment & Subs': [
         'ELSAWY', 'GOOGLE', 'GETCONTACT', 'NETFLIX', 'SPOTIFY', 'MICROSOFT', 
-        'OPENAI', 'LINKEDIN', 'APPLE', 'ITUNES', 'ACADEMY', 'THEMES'
+        'OPENAI', 'LINKEDIN', 'APPLE', 'ITUNES', 'ACADEMY', 'THEMES','CINEMA', 'CINEMA', 'MOVIE', 'PLAYSTATION', 'XBOX', 'GAMING'
     ],
     'ATM': [
         'ATM', 'NATIONAL BANK OF EGYPT', 'DAR EL SALAM', 'CIB', 'QNB', 'BM', 
@@ -38,7 +38,7 @@ CATEGORIES = {
         'MANDARINE', 'ELKEBIR', 'WHAT THE TRUC', '30 NORTH', 'MASHWY', 
         'BEST BUY', 'ARDNA', 'RDNA', 'TEA', 'ABW BRYN','KUFTA', 'KOUEIDER',
         'CIRCLE K', 'GELATO', 'MAYYAL', 'ABO ANAS', 'KOWAYDA',
-        'LOKALI', 'VASKO', 'ZAHIO', 'ALAMYR'
+        'LOKALI', 'VASKO', 'ZAHIO', 'ALAMYR','FRGHLY'
     ],
     'Clothing & Shopping': [
         'LC WAIKIKI', 'MAX', 'SHOES', 'SCARVES', 'CLOTHIN', 'DICE', 'LEATHER', 
